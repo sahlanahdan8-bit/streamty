@@ -6,7 +6,9 @@ Sebuah panel admin berbasis web untuk mengelola livestream YouTube 24/7 mengguna
 
 ## ⚡ Instalasi Cepat (Otomatis)
 
-Metode ini direkomendasikan untuk **server Ubuntu 22.04 LTS yang baru dan bersih**. Perintah tunggal ini akan mengunduh dan menjalankan skrip instalasi yang menangani semua dependensi dan konfigurasi secara otomatis.
+Metode ini **sangat direkomendasikan** untuk server **Ubuntu 22.04 LTS yang baru dan bersih**. Cukup salin, tempel, dan jalankan satu perintah ini di terminal Anda. Skrip akan menangani semua dependensi dan konfigurasi secara otomatis.
+
+> 👉 **Peringatan:** Jangan jalankan skrip ini di server yang sudah memiliki aplikasi web lain, karena dapat menimpa konfigurasi yang ada.
 
 ```bash
 curl -o install.sh https://raw.githubusercontent.com/sahlanahdan8-bit/yt-livestream-controller/main/install.sh && chmod +x install.sh && ./install.sh
@@ -16,53 +18,55 @@ curl -o install.sh https://raw.githubusercontent.com/sahlanahdan8-bit/yt-livestr
 
 ## 🔧 Instalasi Manual (Langkah demi Langkah)
 
-Gunakan panduan ini jika Anda ingin kontrol penuh atau menginstal di sistem yang sudah ada. Ikuti setiap langkah dengan teliti.
+Gunakan panduan ini jika Anda ingin kontrol penuh, menginstal pada sistem operasi yang berbeda, atau pada server yang sudah ada. Ikuti setiap langkah dengan teliti untuk memastikan keberhasilan.
 
-### Tahap 1: Persiapan Server dan Dependensi
+### Tahap 1: Persiapan Server
 
-Pertama, kita akan memperbarui server dan menginstal semua perangkat lunak yang dibutuhkan.
+Di tahap ini, kita akan memperbarui server dan menginstal semua perangkat lunak yang dibutuhkan oleh aplikasi.
 
-**1.1. Perbarui Sistem Operasi**
-Selalu mulai dengan memperbarui daftar paket dan meng-upgrade sistem Anda untuk keamanan dan stabilitas.
+**1. Perbarui Sistem Operasi**
+Selalu mulai dengan memperbarui daftar paket perangkat lunak server Anda. Ini penting untuk keamanan dan stabilitas.
 ```bash
 sudo apt-get update && sudo apt-get upgrade -y
 ```
 
-**1.2. Instal Git dan FFmpeg**
-`git` dibutuhkan untuk mengunduh kode aplikasi, dan `ffmpeg` adalah mesin inti untuk streaming.
+**2. Instal Git dan FFmpeg**
+Kita butuh `git` untuk mengunduh kode aplikasi, dan `ffmpeg` sebagai mesin inti untuk streaming video.
 ```bash
 sudo apt-get install -y git ffmpeg
 ```
 
-**1.3. Instal Node.js v20**
-Aplikasi ini berjalan di atas Node.js. Perintah ini akan menambahkan repositori NodeSource dan menginstal versi 20.
+**3. Instal Node.js versi 20**
+Aplikasi ini berjalan di atas Node.js. Perintah di bawah ini akan menambahkan repositori resmi Node.js dan menginstal versi 20.
 ```bash
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install -y nodejs
 ```
 
-**1.4. Verifikasi Instalasi**
-Pastikan semua perangkat lunak terinstal dengan benar.
+**4. Verifikasi Instalasi**
+Pastikan semua perangkat lunak utama terinstal dengan benar dengan memeriksa versinya.
 ```bash
 node --version
 npm --version
 ffmpeg -version
 ```
-> Anda seharusnya melihat output versi untuk setiap perintah, misalnya `v20.x.x`.
+> ✅ **Hasil yang Diharapkan:** Anda akan melihat output versi untuk setiap perintah (misalnya, `v20.x.x`). Jika ada error, ulangi langkah sebelumnya.
+
+---
 
 ### Tahap 2: Unduh dan Konfigurasi Aplikasi
 
-Sekarang kita akan mengunduh aplikasi dan mengatur konfigurasinya.
+Sekarang kita akan mengunduh aplikasi dari GitHub dan mengatur konfigurasinya.
 
-**2.1. Unduh, Masuk, dan Instal Dependensi**
-Salin dan tempel **seluruh blok di bawah ini** ke terminal. Perintah ini akan mengunduh repositori, langsung masuk ke foldernya, dan menginstal semua pustaka yang dibutuhkan.
+**1. Unduh Aplikasi dan Instal Dependensi**
+Salin dan tempel **seluruh blok kode di bawah ini**. Perintah ini akan mengunduh repositori, langsung masuk ke dalam foldernya, dan menginstal semua pustaka yang dibutuhkan.
 ```bash
 git clone https://github.com/sahlanahdan8-bit/yt-livestream-controller.git && cd yt-livestream-controller && npm install
 ```
-> ✅ **Info**: Karena repositori ini bersifat publik, Anda tidak akan dimintai username atau password. Perintah ini dirancang untuk berhenti jika salah satu langkah gagal, jadi Anda bisa langsung tahu jika ada masalah.
+> 👉 **Penting:** Semua perintah selanjutnya harus dijalankan dari dalam direktori `yt-livestream-controller`.
 
-**2.2. Buat File Konfigurasi `.env`**
-Salin dan tempel **seluruh blok di bawah ini** ke terminal Anda lalu tekan Enter. Ini akan secara otomatis membuat file `.env` di dalam direktori `yt-livestream-controller`.
+**2. Buat File Konfigurasi `.env`**
+File ini menyimpan semua pengaturan penting seperti Kunci Stream Anda. Salin dan tempel **seluruh blok kode di bawah ini** untuk membuatnya secara otomatis.
 ```bash
 cat << EOF > .env
 # Konfigurasi Web Server
@@ -82,62 +86,95 @@ NODE_ENV=production
 EOF
 ```
 
-**2.3. Edit File Konfigurasi (WAJIB!)**
-Buka file yang baru saja dibuat untuk memasukkan Kunci Stream YouTube Anda.
+**3. ❗ Edit File Konfigurasi (Langkah Wajib!)**
+Buka file yang baru saja dibuat menggunakan editor teks `nano` untuk memasukkan Kunci Stream YouTube Anda.
 ```bash
 nano .env
 ```
 Di dalam editor `nano`:
-1.  Cari baris `STREAM_KEY=ganti-dengan-kunci-stream-anda`.
-2.  Ganti `ganti-dengan-kunci-stream-anda` dengan Kunci Stream Anda yang sebenarnya.
-3.  Tekan `CTRL + X`, lalu `Y`, lalu `Enter` untuk menyimpan dan keluar.
+1.  Gunakan tombol panah untuk mencari baris `STREAM_KEY=ganti-dengan-kunci-stream-anda`.
+2.  Hapus `ganti-dengan-kunci-stream-anda` dan masukkan Kunci Stream Anda yang sebenarnya.
+3.  Untuk menyimpan dan keluar, tekan `CTRL + X`, lalu tekan `Y`, dan terakhir tekan `Enter`.
+
+---
 
 ### Tahap 3: Build dan Jalankan Aplikasi
 
-Aplikasi siap untuk di-build dan dijalankan secara permanen menggunakan PM2.
+Aplikasi siap untuk di-build (dikompilasi) dan dijalankan secara permanen menggunakan manajer proses PM2.
 
-**3.1. Build Aplikasi**
-Perintah ini akan mengompilasi kode dari TypeScript ke JavaScript agar siap dijalankan di lingkungan produksi.
+**1. Build Aplikasi**
+Perintah ini akan mengubah kode sumber (TypeScript) menjadi kode JavaScript yang siap dijalankan dan dioptimalkan.
 ```bash
 npm run build
 ```
 
-**3.2. Instal PM2 (Process Manager)**
-PM2 adalah alat yang akan menjaga aplikasi Anda tetap berjalan 24/7 dan me-restartnya secara otomatis jika terjadi crash.
+**2. Instal PM2 (Process Manager)**
+PM2 adalah alat yang akan menjaga aplikasi Anda tetap berjalan 24/7. Jika terjadi crash, PM2 akan me-restartnya secara otomatis.
 ```bash
 sudo npm install pm2 -g
 ```
 
-**3.3. Jalankan Aplikasi dengan PM2**
-Jalankan perintah ini dari dalam direktori `yt-livestream-controller`. PM2 akan menjalankan proses server web dan worker streaming.
+**3. Jalankan Aplikasi dengan PM2**
+Perintah ini akan memulai dua proses: server web (antarmuka) dan worker streaming (mesin ffmpeg).
 ```bash
 pm2 start npm --name "streamer-web" -- run start:web
 pm2 start npm --name "streamer-worker" -- run start:worker
 ```
+> ✅ **Cek Status:** Anda bisa melihat status proses dengan `pm2 list`. Keduanya harus dalam keadaan `online`.
 
-**3.4. (Opsional) Atur PM2 agar Berjalan saat Startup**
-Langkah ini sangat direkomendasikan agar aplikasi otomatis berjalan kembali setelah server di-reboot.
+**4. Atur PM2 agar Berjalan saat Startup (Sangat Direkomendasikan)**
+Langkah ini memastikan aplikasi Anda akan otomatis berjalan kembali jika server di-reboot.
 ```bash
 pm2 save
 pm2 startup
 ```
-> 👉 Setelah menjalankan `pm2 startup`, Anda akan diberikan satu perintah lagi oleh PM2. Salin dan jalankan perintah tersebut untuk menyelesaikan proses.
+> 👉 **Perhatian:** Setelah menjalankan `pm2 startup`, terminal akan memberikan satu perintah lagi. Salin dan jalankan perintah tersebut untuk menyelesaikan proses.
 
-### Tahap 4: Konfigurasi Firewall dan Akses
+---
 
-Langkah terakhir adalah memastikan aplikasi dapat diakses dari luar.
+### Tahap 4: Buka Akses Firewall
 
-**4.1. Buka Port di Firewall (UFW)**
-Izinkan koneksi masuk ke port yang digunakan oleh aplikasi (misalnya 8080) dan port SSH.
+Langkah terakhir adalah membuka port di firewall agar panel admin dapat diakses dari browser.
+
+**1. Izinkan Koneksi di UFW (Uncomplicated Firewall)**
+Perintah ini akan membuka port SSH (untuk Anda) dan port aplikasi (default 8080).
 ```bash
 sudo ufw allow ssh
 sudo ufw allow 8080
 sudo ufw enable
 ```
-> Saat diminta konfirmasi untuk `ufw enable`, ketik `y` lalu Enter.
+> Saat diminta konfirmasi untuk `ufw enable`, ketik `y` lalu tekan `Enter`. Jika Anda mengubah `PORT` di file `.env`, ganti `8080` di atas sesuai dengan port Anda.
 
-**4.2. Akses Aplikasi**
-Sekarang Anda dapat mengakses panel admin melalui browser di:
+**2. Akses Panel Admin**
+Instalasi selesai! Buka browser Anda dan navigasi ke alamat berikut:
 `http://IP_VPS_ANDA:8080`
 
-Selamat, instalasi selesai! Anda dapat mulai mengunggah video dan mengelola stream Anda.
+---
+
+### Manajemen Aplikasi (Setelah Instalasi)
+
+Berikut adalah beberapa perintah PM2 yang berguna untuk mengelola aplikasi Anda.
+
+- **Melihat Log Aplikasi (untuk troubleshooting):**
+  ```bash
+  # Melihat log dari worker streaming (ffmpeg)
+  pm2 logs streamer-worker
+
+  # Melihat log dari server web
+  pm2 logs streamer-web
+  ```
+
+- **Menghentikan, Memulai, atau Me-restart Aplikasi:**
+  ```bash
+  # Menghentikan semua proses
+  pm2 stop all
+
+  # Memulai ulang semua proses
+  pm2 restart all
+
+  # Menghapus proses dari daftar PM2
+  pm2 delete all
+  ```
+
+- **Menambahkan Video:**
+  Unggah file video Anda (misalnya via SFTP atau SCP) ke dalam direktori `~/yt-livestream-controller/videos`. Aplikasi akan secara otomatis mendeteksinya.
