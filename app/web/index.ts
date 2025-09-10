@@ -1,10 +1,7 @@
-// FIX: To avoid global type conflicts with DOM typings (e.g., for `fetch`),
-// we explicitly import `Request` and `Response` from `express`.
-// FIX: Explicitly import Request and Response types from express to avoid conflicts with global DOM types.
-// FIX: The named import for Request and Response was incorrect and causing type conflicts. 
-// Changed to a default import for express and used express.Request and express.Response 
-// to correctly reference express types, which resolves all compilation errors.
+// Fix: Use a type-only import for Express Request and Response to prevent conflicts
+// with global DOM types, which was causing numerous compilation errors.
 import express from 'express';
+import type { Request, Response } from 'express';
 import cors from 'cors';
 import path from 'path';
 import fs from 'fs/promises';
@@ -41,7 +38,8 @@ app.use(express.json());
 
 // NEW: Endpoint to get list of available videos
 // FIX: Use explicit Request and Response types from express.
-app.get('/api/videos', async (req: express.Request, res: express.Response) => {
+// FIX: Use named imports for Request and Response types to avoid conflict with global DOM types.
+app.get('/api/videos', async (req: Request, res: Response) => {
     try {
         const files = await fs.readdir(VIDEO_DIR);
         // Filter for common video formats, can be expanded
@@ -56,7 +54,8 @@ app.get('/api/videos', async (req: express.Request, res: express.Response) => {
 
 // Get current stream status
 // FIX: Use explicit Request and Response types from express.
-app.get('/api/stream/status', async (req: express.Request, res: express.Response) => {
+// FIX: Use named imports for Request and Response types to avoid conflict with global DOM types.
+app.get('/api/stream/status', async (req: Request, res: Response) => {
     try {
         const statusData = await fs.readFile(STATUS_FILE, 'utf-8');
         res.json(JSON.parse(statusData));
@@ -73,7 +72,8 @@ const sendCommand = async (command: 'START' | 'STOP') => {
 };
 
 // FIX: Use explicit Request and Response types from express.
-app.post('/api/stream/start', async (req: express.Request, res: express.Response) => {
+// FIX: Use named imports for Request and Response types to avoid conflict with global DOM types.
+app.post('/api/stream/start', async (req: Request, res: Response) => {
     try {
         await sendCommand('START');
         res.status(202).json({ message: 'Stream start command issued.' });
@@ -83,7 +83,8 @@ app.post('/api/stream/start', async (req: express.Request, res: express.Response
 });
 
 // FIX: Use explicit Request and Response types from express.
-app.post('/api/stream/stop', async (req: express.Request, res: express.Response) => {
+// FIX: Use named imports for Request and Response types to avoid conflict with global DOM types.
+app.post('/api/stream/stop', async (req: Request, res: Response) => {
     try {
         await sendCommand('STOP');
         res.status(202).json({ message: 'Stream stop command issued.' });
@@ -94,7 +95,8 @@ app.post('/api/stream/stop', async (req: express.Request, res: express.Response)
 
 // Get/Set stream configuration
 // FIX: Use explicit Request and Response types from express.
-app.get('/api/stream/config', async (req: express.Request, res: express.Response) => {
+// FIX: Use named imports for Request and Response types to avoid conflict with global DOM types.
+app.get('/api/stream/config', async (req: Request, res: Response) => {
      try {
         const configData = await fs.readFile(CONFIG_FILE, 'utf-8');
         res.json(JSON.parse(configData));
@@ -105,7 +107,8 @@ app.get('/api/stream/config', async (req: express.Request, res: express.Response
 });
 
 // FIX: Use explicit Request and Response types from express.
-app.post('/api/stream/config', async (req: express.Request, res: express.Response) => {
+// FIX: Use named imports for Request and Response types to avoid conflict with global DOM types.
+app.post('/api/stream/config', async (req: Request, res: Response) => {
     try {
         const newConfig: StreamConfig = req.body;
         // Add validation here in a real app
@@ -135,7 +138,8 @@ app.use(express.static(path.join(distRoot, 'public')));
 
 // SPA Fallback: For any route not matched by static assets or API, serve index.html
 // FIX: Use explicit Request and Response types from express.
-app.get('*', (req: express.Request, res: express.Response) => {
+// FIX: Use named imports for Request and Response types to avoid conflict with global DOM types.
+app.get('*', (req: Request, res: Response) => {
   res.sendFile(path.join(distRoot, 'public', 'index.html'));
 });
 

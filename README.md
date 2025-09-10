@@ -1,6 +1,6 @@
-# YouTube 24/7 Livestream Controller
+# Streanty
 
-Sebuah panel admin berbasis web untuk mengelola livestream YouTube 24/7 menggunakan FFmpeg di VPS. Didesain untuk keandalan tinggi dengan fitur monitoring, kontrol start/stop, dan kemampuan auto-restart.
+Panel admin berbasis web untuk mengelola dan memonitor livestream 24/7 di server pribadi (VPS). Dirancang untuk keandalan tinggi dengan fitur kontrol, penjadwalan, dan kemampuan auto-restart.
 
 ---
 
@@ -11,118 +11,128 @@ Metode ini **sangat direkomendasikan** untuk server **Ubuntu 22.04 LTS yang baru
 > 👉 **Peringatan:** Jangan jalankan skrip ini di server yang sudah memiliki aplikasi web lain, karena dapat menimpa konfigurasi yang ada.
 
 ```bash
-curl -o install.sh https://raw.githubusercontent.com/sahlanahdan8-bit/yt-livestream-controller/main/install.sh && chmod +x install.sh && ./install.sh
+curl -o install.sh https://raw.githubusercontent.com/sahlanahdan8-bit/Streanty/main/install.sh && chmod +x install.sh && ./install.sh
 ```
 
 ---
 
 ## 🔧 Instalasi Manual (Langkah demi Langkah)
 
-Gunakan panduan ini jika Anda ingin kontrol penuh, menginstal pada sistem operasi yang berbeda, atau pada server yang sudah ada. Ikuti setiap langkah dengan teliti untuk memastikan keberhasilan.
+Gunakan panduan ini jika Anda ingin kontrol penuh, menginstal pada sistem operasi yang berbeda, atau pada server yang sudah ada.
 
-### Tahap 1: Persiapan Server
+### 1. Persiapan Server
 
-Di tahap ini, kita akan memperbarui server dan menginstal semua perangkat lunak yang dibutuhkan oleh aplikasi.
-
-**1. Perbarui Sistem Operasi**
-Selalu mulai dengan memperbarui daftar paket perangkat lunak server Anda. Ini penting untuk keamanan dan stabilitas.
+**a. Perbarui Sistem Operasi**
+Selalu mulai dengan memperbarui daftar paket perangkat lunak server Anda untuk keamanan dan stabilitas.
 ```bash
 sudo apt-get update && sudo apt-get upgrade -y
 ```
 
-**2. Instal Git dan FFmpeg**
-Kita butuh `git` untuk mengunduh kode aplikasi, dan `ffmpeg` sebagai mesin inti untuk streaming video.
+**b. Instal Dependensi Utama (Git, FFmpeg, Node.js)**
+Kita butuh `git` untuk mengunduh kode, `ffmpeg` sebagai mesin streaming, dan `Node.js` untuk menjalankan aplikasi.
 ```bash
+# Instal Git dan FFmpeg
 sudo apt-get install -y git ffmpeg
-```
 
-**3. Instal Node.js versi 20**
-Aplikasi ini berjalan di atas Node.js. Perintah di bawah ini akan menambahkan repositori resmi Node.js dan menginstal versi 20.
-```bash
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+# Instal Node.js versi 22
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get install -y nodejs
 ```
 
-**4. Verifikasi Instalasi**
-Pastikan semua perangkat lunak utama terinstal dengan benar dengan memeriksa versinya.
+**c. Verifikasi Instalasi**
+Pastikan semua perangkat lunak terinstal dengan benar dengan memeriksa versinya.
 ```bash
 node --version
 npm --version
 ffmpeg -version
 ```
-> ✅ **Hasil yang Diharapkan:** Anda akan melihat output versi untuk setiap perintah (misalnya, `v20.x.x`). Jika ada error, ulangi langkah sebelumnya.
+> ✅ **Hasil yang Diharapkan:** Anda akan melihat output versi untuk setiap perintah (misalnya, `v22.x.x`).
 
----
+### 2. Konfigurasi Aplikasi
 
-### Tahap 2: Unduh dan Konfigurasi Aplikasi
+**a. Unduh Aplikasi**
 
-Sekarang kita akan mengunduh aplikasi dari GitHub dan mengatur konfigurasinya.
+Pilih **salah satu** dari dua metode di bawah ini untuk mendapatkan kode aplikasi.
 
-**1. Unduh Aplikasi dan Instal Dependensi**
-Salin dan tempel **seluruh blok kode di bawah ini**. Perintah ini akan mengunduh repositori, langsung masuk ke dalam foldernya, dan menginstal semua pustaka yang dibutuhkan.
+**Opsi 1: Menggunakan Git (Direkomendasikan)**
+
+Metode ini adalah cara standar dan memudahkan untuk mendapatkan pembaruan di masa depan.
 ```bash
-git clone https://github.com/sahlanahdan8-bit/yt-livestream-controller.git && cd yt-livestream-controller && npm install
+git clone https://github.com/sahlanahdan8-bit/Streanty.git
+cd Streanty
 ```
-> 👉 **Penting:** Semua perintah selanjutnya harus dijalankan dari dalam direktori `yt-livestream-controller`.
 
-**2. Buat File Konfigurasi `.env`**
-File ini menyimpan semua pengaturan penting seperti Kunci Stream Anda. Salin dan tempel **seluruh blok kode di bawah ini** untuk membuatnya secara otomatis.
+**Opsi 2: Menggunakan File ZIP (Jika Sudah Diunggah)**
+
+Gunakan metode ini jika Anda telah mengunggah file `.zip` proyek ke VPS Anda.
+```bash
+# 1. (Jika belum ada) Instal 'unzip'
+sudo apt-get install -y unzip
+
+# 2. Ekstrak file zip Anda (ganti nama file jika berbeda)
+unzip Streanty-main.zip
+
+# 3. Ganti nama folder agar sesuai dengan panduan (PENTING!)
+mv Streanty-main Streanty
+
+# 4. Masuk ke folder aplikasi
+cd Streanty
+```
+> 👉 **Catatan:** Nama folder setelah ekstraksi biasanya `Streanty-main`. Perintah `mv` di atas mengubahnya menjadi `Streanty` agar semua perintah lain dalam panduan ini berfungsi tanpa perlu diubah.
+
+**b. Instal Pustaka (Dependencies)**
+
+Setelah berada di dalam folder `Streanty` (baik dari `git clone` maupun `unzip`), jalankan perintah ini untuk menginstal semua pustaka yang dibutuhkan.
+```bash
+npm install
+```
+
+**c. Buat File Konfigurasi `.env`**
+File ini menyimpan semua pengaturan penting. Salin dan tempel blok di bawah ini untuk membuatnya.
 ```bash
 cat << EOF > .env
-# Konfigurasi Web Server
-PORT=8080
-
-# Konfigurasi Stream (WAJIB DIUBAH)
-STREAM_KEY=ganti-dengan-kunci-stream-anda
-RTMP_URL=rtmp://a.rtmp.youtube.com/live2
-
-# Path Absolut (PENTING: sesuaikan jika path instalasi berbeda)
-# Menggunakan $(pwd) untuk secara otomatis mengisi direktori saat ini
-DATA_DIR=$(pwd)/data
-VIDEO_DIR=$(pwd)/videos
-
-# Lingkungan
-NODE_ENV=production
+PORT=7575
+SESSION_SECRET=ganti_dengan_teks_acak_yang_sangat_panjang_dan_aman
+NODE_ENV=development
 EOF
 ```
+> ⚠️ **Penting:** Ganti nilai `SESSION_SECRET` dengan string acak buatan Anda sendiri (misalnya, dari generator password).
 
-**3. ❗ Edit File Konfigurasi (Langkah Wajib!)**
-Buka file yang baru saja dibuat menggunakan editor teks `nano` untuk memasukkan Kunci Stream YouTube Anda.
-```bash
-nano .env
-```
-Di dalam editor `nano`:
-1.  Gunakan tombol panah untuk mencari baris `STREAM_KEY=ganti-dengan-kunci-stream-anda`.
-2.  Hapus `ganti-dengan-kunci-stream-anda` dan masukkan Kunci Stream Anda yang sebenarnya.
-3.  Untuk menyimpan dan keluar, tekan `CTRL + X`, lalu tekan `Y`, dan terakhir tekan `Enter`.
-
----
-
-### Tahap 3: Build dan Jalankan Aplikasi
-
-Aplikasi siap untuk di-build (dikompilasi) dan dijalankan secara permanen menggunakan manajer proses PM2.
-
-**1. Build Aplikasi**
-Perintah ini akan mengubah kode sumber (TypeScript) menjadi kode JavaScript yang siap dijalankan dan dioptimalkan.
+**d. Build Aplikasi**
+Karena ini adalah proyek TypeScript, kita perlu mengkompilasi kode ke JavaScript biasa.
 ```bash
 npm run build
 ```
 
-**2. Instal PM2 (Process Manager)**
-PM2 adalah alat yang akan menjaga aplikasi Anda tetap berjalan 24/7. Jika terjadi crash, PM2 akan me-restartnya secara otomatis.
+**e. Jalankan Aplikasi (Mode Development)**
+Untuk pengujian, Anda bisa menjalankan server dengan perintah berikut. Buka dua terminal, satu untuk web dan satu untuk worker.
+```bash
+# Di terminal 1
+npm run dev:web
+
+# Di terminal 2
+npm run dev:worker
+```
+
+---
+
+## 🧠 Process Manager (PM2)
+
+PM2 akan menjaga aplikasi Anda tetap berjalan 24/7 dan me-restartnya secara otomatis jika terjadi crash.
+
+**1. Instal PM2 Secara Global**
 ```bash
 sudo npm install pm2 -g
 ```
 
-**3. Jalankan Aplikasi dengan PM2**
-Perintah ini akan memulai dua proses: server web (antarmuka) dan worker streaming (mesin ffmpeg).
+**2. Jalankan Aplikasi dengan PM2**
+Perintah ini akan memulai server web dan worker streaming dengan nama `streamflow`.
 ```bash
-pm2 start npm --name "streamer-web" -- run start:web
-pm2 start npm --name "streamer-worker" -- run start:worker
+pm2 start npm --name "streamflow-web" -- run start:web
+pm2 start npm --name "streamflow-worker" -- run start:worker
 ```
-> ✅ **Cek Status:** Anda bisa melihat status proses dengan `pm2 list`. Keduanya harus dalam keadaan `online`.
 
-**4. Atur PM2 agar Berjalan saat Startup (Sangat Direkomendasikan)**
+**3. Simpan Konfigurasi PM2 (Sangat Direkomendasikan)**
 Langkah ini memastikan aplikasi Anda akan otomatis berjalan kembali jika server di-reboot.
 ```bash
 pm2 save
@@ -132,49 +142,126 @@ pm2 startup
 
 ---
 
-### Tahap 4: Buka Akses Firewall
+## 🛡️ Firewall (UFW)
 
-Langkah terakhir adalah membuka port di firewall agar panel admin dapat diakses dari browser.
+Buka akses port agar panel admin dapat diakses dari browser.
 
-**1. Izinkan Koneksi di UFW (Uncomplicated Firewall)**
-Perintah ini akan membuka port SSH (untuk Anda) dan port aplikasi (default 8080).
+**1. Izinkan Koneksi**
+Perintah ini akan membuka port SSH (untuk Anda) dan port aplikasi (7575).
 ```bash
 sudo ufw allow ssh
-sudo ufw allow 8080
-sudo ufw enable
+sudo ufw allow 7575
 ```
-> Saat diminta konfirmasi untuk `ufw enable`, ketik `y` lalu tekan `Enter`. Jika Anda mengubah `PORT` di file `.env`, ganti `8080` di atas sesuai dengan port Anda.
 
-**2. Akses Panel Admin**
-Instalasi selesai! Buka browser Anda dan navigasi ke alamat berikut:
-`http://IP_VPS_ANDA:8080`
+**2. Aktifkan dan Cek Status Firewall**
+```bash
+sudo ufw enable
+sudo ufw status
+```
+> Saat diminta konfirmasi, ketik `y` lalu tekan `Enter`.
 
 ---
 
-### Manajemen Aplikasi (Setelah Instalasi)
+## 🌐 Akses Aplikasi
 
-Berikut adalah beberapa perintah PM2 yang berguna untuk mengelola aplikasi Anda.
+Instalasi selesai! Buka browser Anda dan navigasi ke alamat berikut:
+`http://IP_SERVER_ANDA:7575`
 
-- **Melihat Log Aplikasi (untuk troubleshooting):**
-  ```bash
-  # Melihat log dari worker streaming (ffmpeg)
-  pm2 logs streamer-worker
+---
 
-  # Melihat log dari server web
-  pm2 logs streamer-web
-  ```
+## 🔐 Reset Password
 
-- **Menghentikan, Memulai, atau Me-restart Aplikasi:**
-  ```bash
-  # Menghentikan semua proses
-  pm2 stop all
+Jika aplikasi Anda memiliki fitur reset password melalui skrip, jalankan perintah ini dari dalam direktori aplikasi.
+```bash
+# Pastikan Anda berada di dalam folder /Streanty
+node reset-password.js
+```
 
-  # Memulai ulang semua proses
-  pm2 restart all
+---
 
-  # Menghapus proses dari daftar PM2
-  pm2 delete all
-  ```
+## ⏰ Timezone Server
 
-- **Menambahkan Video:**
-  Unggah file video Anda (misalnya via SFTP atau SCP) ke dalam direktori `~/yt-livestream-controller/videos`. Aplikasi akan secara otomatis mendeteksinya.
+Pengaturan waktu yang benar penting untuk penjadwalan dan logging.
+
+**1. Cek Timezone Saat Ini**
+```bash
+timedatectl status
+```
+
+**2. Set Timezone ke Waktu Indonesia Barat (WIB)**
+```bash
+sudo timedatectl set-timezone Asia/Jakarta
+```
+
+**3. Restart Aplikasi untuk Menerapkan Perubahan**
+```bash
+pm2 restart streamflow-web streamflow-worker
+```
+
+---
+
+## 🐳 Deploy via Docker
+
+Sebagai alternatif dari instalasi manual, Anda dapat menggunakan Docker untuk deployment yang terisolasi dan konsisten.
+
+**1. Persiapan Environment**
+Buat file `.env` di root proyek dengan konten berikut:
+```
+PORT=7575
+SESSION_SECRET=ganti_dengan_teks_acak_yang_sangat_panjang_dan_aman
+NODE_ENV=development
+```
+
+**2. Build dan Jalankan Container**
+```bash
+docker-compose up --build
+```
+Aplikasi sekarang dapat diakses di `http://localhost:7575` (atau `http://IP_SERVER_ANDA:7575`).
+
+**3. Data Persistence**
+Data akan tersimpan secara otomatis di volume Docker yang ter-map ke folder lokal:
+-   **Database:** `db/`
+-   **Logs:** `logs/`
+-   **Uploads:** `public/uploads/`
+
+**4. Reset Password (dalam Container)**
+Jika fitur ini tersedia, jalankan perintah berikut dari terminal host:
+```bash
+docker-compose exec app node reset-password.js
+```
+
+---
+
+## 🧯 Troubleshooting
+
+**Permission Error (Gagal Upload)**
+Jika aplikasi gagal mengunggah file, perbaiki izin folder.
+```bash
+chmod -R 755 public/uploads/
+```
+> ⚠️ **Catatan Keamanan:** Hindari menggunakan `chmod 777` di lingkungan produksi. `755` sudah cukup untuk sebagian besar kasus.
+
+**Port Already in Use**
+Jika aplikasi gagal start karena port sudah terpakai.
+```bash
+# Cek proses yang menggunakan port 7575
+sudo lsof -i :7575
+
+# Matikan proses tersebut jika diperlukan
+sudo kill -9 <PID>
+```
+
+**Database Error / Reset Data**
+Untuk mereset database ke kondisi awal.
+> ⚠️ **PERINGATAN:** Perintah ini akan **menghapus semua data** yang ada secara permanen.
+```bash
+# Hapus file database
+rm db/*.db
+
+# Restart aplikasi untuk membuat database baru
+pm2 restart streamflow-web
+```
+
+**Masalah Session/Login di Produksi**
+-   Pastikan `NODE_ENV=production` di file `.env`.
+-   Akses aplikasi **wajib melalui HTTPS**. Cookie session modern memerlukan koneksi aman (HTTPS) untuk dapat berfungsi dengan benar di browser.
