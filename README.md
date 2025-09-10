@@ -54,27 +54,15 @@ ffmpeg -version
 
 Sekarang kita akan mengunduh aplikasi dan mengatur konfigurasinya.
 
-**2.1. Clone Repositori dari GitHub**
-Unduh kode sumber aplikasi ke server Anda.
+**2.1. Unduh, Masuk, dan Instal Dependensi**
+Salin dan tempel **seluruh blok di bawah ini** ke terminal. Perintah ini akan mengunduh repositori, langsung masuk ke foldernya, dan menginstal semua pustaka yang dibutuhkan.
 ```bash
-git clone https://github.com/sahlanahdan8-bit/yt-livestream-controller.git
+git clone https://github.com/sahlanahdan8-bit/yt-livestream-controller.git && cd yt-livestream-controller && npm install
 ```
+> ✅ **Info**: Karena repositori ini bersifat publik, Anda tidak akan dimintai username atau password. Perintah ini dirancang untuk berhenti jika salah satu langkah gagal, jadi Anda bisa langsung tahu jika ada masalah.
 
-**2.2. Masuk ke Direktori Proyek (SANGAT PENTING!)**
-Setelah diunduh, Anda **wajib** masuk ke dalam folder proyek. Semua perintah selanjutnya harus dijalankan dari sini.
-```bash
-cd yt-livestream-controller
-```
-> 💡 **Tips**: Prompt terminal Anda akan berubah dan menampilkan `yt-livestream-controller` di path-nya.
-
-**2.3. Instal Dependensi Aplikasi**
-Perintah ini membaca file `package.json` dan menginstal semua pustaka yang dibutuhkan oleh aplikasi.
-```bash
-npm install
-```
-
-**2.4. Buat File Konfigurasi `.env`**
-Salin dan tempel **seluruh blok di bawah ini** ke terminal Anda lalu tekan Enter. Ini akan secara otomatis membuat file `.env`.
+**2.2. Buat File Konfigurasi `.env`**
+Salin dan tempel **seluruh blok di bawah ini** ke terminal Anda lalu tekan Enter. Ini akan secara otomatis membuat file `.env` di dalam direktori `yt-livestream-controller`.
 ```bash
 cat << EOF > .env
 # Konfigurasi Web Server
@@ -94,7 +82,7 @@ NODE_ENV=production
 EOF
 ```
 
-**2.5. Edit File Konfigurasi (WAJIB!)**
+**2.3. Edit File Konfigurasi (WAJIB!)**
 Buka file yang baru saja dibuat untuk memasukkan Kunci Stream YouTube Anda.
 ```bash
 nano .env
