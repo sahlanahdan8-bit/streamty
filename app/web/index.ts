@@ -1,4 +1,5 @@
 
+// FIX: Import Request and Response from express to fix typing issues.
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -35,6 +36,8 @@ app.use(express.json());
 // --- API Endpoints ---
 
 // NEW: Endpoint to get list of available videos
+// Fix: Use express.Request and express.Response to avoid type conflicts.
+// FIX: Used Request and Response types from express to fix handler signature.
 app.get('/api/videos', async (req: Request, res: Response) => {
     try {
         const files = await fs.readdir(VIDEO_DIR);
@@ -49,6 +52,8 @@ app.get('/api/videos', async (req: Request, res: Response) => {
 
 
 // Get current stream status
+// Fix: Use express.Request and express.Response to avoid type conflicts.
+// FIX: Used Request and Response types from express to fix handler signature.
 app.get('/api/stream/status', async (req: Request, res: Response) => {
     try {
         const statusData = await fs.readFile(STATUS_FILE, 'utf-8');
@@ -65,6 +70,8 @@ const sendCommand = async (command: 'START' | 'STOP') => {
     await fs.writeFile(COMMAND_FILE, JSON.stringify(commandData));
 };
 
+// Fix: Use express.Request and express.Response to avoid type conflicts.
+// FIX: Used Request and Response types from express to fix handler signature.
 app.post('/api/stream/start', async (req: Request, res: Response) => {
     try {
         await sendCommand('START');
@@ -74,6 +81,8 @@ app.post('/api/stream/start', async (req: Request, res: Response) => {
     }
 });
 
+// Fix: Use express.Request and express.Response to avoid type conflicts.
+// FIX: Used Request and Response types from express to fix handler signature.
 app.post('/api/stream/stop', async (req: Request, res: Response) => {
     try {
         await sendCommand('STOP');
@@ -84,6 +93,8 @@ app.post('/api/stream/stop', async (req: Request, res: Response) => {
 });
 
 // Get/Set stream configuration
+// Fix: Use express.Request and express.Response to avoid type conflicts.
+// FIX: Used Request and Response types from express to fix handler signature.
 app.get('/api/stream/config', async (req: Request, res: Response) => {
      try {
         const configData = await fs.readFile(CONFIG_FILE, 'utf-8');
@@ -94,6 +105,8 @@ app.get('/api/stream/config', async (req: Request, res: Response) => {
     }
 });
 
+// Fix: Use express.Request and express.Response to avoid type conflicts.
+// FIX: Used Request and Response types from express to fix handler signature.
 app.post('/api/stream/config', async (req: Request, res: Response) => {
     try {
         const newConfig: StreamConfig = req.body;
@@ -124,6 +137,8 @@ app.use(express.static(path.join(distRoot, 'public')));
 
 // SPA Fallback: For any route not matched by static assets or API, serve index.html
 // Fix: Add explicit types to handler to resolve TypeScript overload error.
+// Fix: Use express.Request and express.Response to avoid type conflicts.
+// FIX: Used Request and Response types from express to fix handler signature.
 app.get('*', (req: Request, res: Response) => {
   res.sendFile(path.join(distRoot, 'public', 'index.html'));
 });

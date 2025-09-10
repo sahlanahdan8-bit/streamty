@@ -1,101 +1,207 @@
 # YouTube 24/7 Livestream Controller
 
-This project provides a complete, production-ready solution for running a 24/7 YouTube livestream from a low-resource VPS (1 vCPU, 1-2 GB RAM). It features a lightweight web admin panel, a resilient FFmpeg worker process with auto-restart capabilities, and a suite of scripts for easy installation and maintenance.
+Sebuah panel admin berbasis web untuk mengelola livestream YouTube 24/7 menggunakan FFmpeg di VPS. Didesain untuk keandalan tinggi dengan fitur monitoring, kontrol start/stop, dan kemampuan auto-restart.
 
 ---
 
-### **Daftar Isi (Bahasa Indonesia)**
-Proyek ini menyediakan solusi siap produksi untuk menjalankan livestream YouTube 24/7 dari VPS dengan sumber daya rendah. Lihat bagian di bawah untuk instruksi lengkap dalam Bahasa Inggris.
+## ⚡ Instalasi Cepat (Quick Installation)
 
-- **Fitur Utama**: Panel admin, auto-restart, monitoring real-time.
-- **Instalasi Satu Perintah**: Jalankan skrip `install.sh` di server Ubuntu 22.04 LTS baru.
-- **Konfigurasi**: Atur stream key dan unggah video setelah instalasi.
-- **Troubleshooting**: Tips untuk mengatasi masalah umum.
+Metode ini direkomendasikan untuk server Ubuntu 22.04 LTS yang baru. Perintah tunggal ini akan mengunduh dan menjalankan skrip instalasi yang akan menangani semua dependensi dan konfigurasi secara otomatis.
+
+```bash
+curl -o install.sh https://raw.githubusercontent.com/sahlanahdan8-bit/yt-livestream-controller/main/install.sh && chmod +x install.sh && ./install.sh
+```
+> ⚠️ **Penting**: Skrip di atas adalah contoh. Pastikan URL menunjuk ke file `install.sh` yang valid di repositori Anda.
 
 ---
 
-## Key Features
+## 🔧 Instalasi Manual
 
-- **Web Admin Dashboard**: A simple, clean React-based UI to monitor and control your stream.
-- **High Reliability**: Designed for a 1-year uptime target with zero manual intervention.
-  - **Auto-Restart**: Automatically restarts FFmpeg on failure (crash, stuck, zero bitrate).
-  - **Exponential Backoff**: Prevents hammering the system with rapid restarts.
-  - **Systemd Services**: Manages the web, worker, and watchdog processes, ensuring they run on boot and restart if they crash.
-  - **External Watchdog**: An extra layer of monitoring to ensure the stream is always healthy.
-- **Low Resource Usage**: Optimized for small VPS instances.
-- **Flexible Video Sources**: Automatically creates a playlist from all videos in the `/opt/stream/videos` directory.
+Ikuti langkah-langkah ini untuk instalasi manual di server Ubuntu 22.04.
 
-## One-Command Installation (Fresh Ubuntu 22.04 LTS)
+### 1. Perbarui Sistem & Instalasi Dependensi
 
-1.  **Log in to your VPS as root.**
+Pertama, perbarui sistem Anda dan instal semua perangkat lunak yang diperlukan.
 
-2.  **Clone the repository and run the installation script:**
-    This single command will clone the repository, enter the directory, and execute the installation script with the necessary permissions.
+```bash
+# Perbarui daftar paket
+sudo apt-get update && sudo apt-get upgrade -y
 
-    ```bash
-    apt-get update && apt-get install -y git && git clone https://github.com/your-username/your-repo.git youtube-streamer && cd youtube-streamer && sudo bash scripts/install.sh
-    ```
-    *Note: Replace `https://github.com/your-username/your-repo.git` with the actual URL of this repository.*
+# Instal Git dan FFmpeg
+sudo apt-get install -y git ffmpeg
 
-3.  **The script will handle everything**:
-    - Creating a dedicated `streamer` user.
-    - Setting up directories (`/opt/stream`, `/opt/stream/videos`, etc.).
-    - Installing Node.js and FFmpeg.
-    - Building the application.
-    - Setting up and enabling the `systemd` services.
-    - Creating a default `.env` file.
+# Instal Node.js v20 (via NodeSource)
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
 
-## Post-Installation Configuration (Crucial!)
+# Verifikasi instalasi
+node --version # Harus menampilkan v20.x.x
+npm --version
+ffmpeg -version
+```
 
-After the script finishes, you **must** configure your stream.
+### 2. Clone Repositori
 
-1.  **Edit the `.env` file**:
-    ```bash
-    sudo nano /opt/stream/.env
-    ```
-    - **Change `ADMIN_PASS`**: Set a strong, unique password for the web dashboard.
-    - **Set `STREAM_KEY`**: Paste your stream key from YouTube.
-    - Save the file (Ctrl+X, then Y, then Enter).
+Unduh kode sumber dari repositori GitHub Anda.
 
-2.  **Restart the services** to apply the new configuration:
-    ```bash
-    sudo systemctl restart streamer-web streamer-worker
-    ```
+```bash
+git clone https://github.com/sahlanahdan8-bit/yt-livestream-controller.git
+```
 
-3.  **Upload Your Videos**:
-    - Use SCP, SFTP, or rsync to upload your video files (`.mp4`, `.mkv`, etc.) to the `/opt/stream/videos` directory on your VPS. The system will automatically find them and create a looping playlist.
+### 3. Instalasi & Konfigurasi Proyek
 
-4.  **Access the Web UI**:
-    - Open your browser and navigate to `http://<your-vps-ip>:8080`.
-    - **Username**: `admin`
-    - **Password**: The new password you just set.
-    - Click "Start" to begin your livestream.
+Masuk ke direktori proyek, instal dependensi, dan atur file konfigurasi.
 
-## Troubleshooting
+```bash
+# Masuk ke folder proyek
+cd yt-livestream-controller
 
--   **Check the service logs**:
-    ```bash
-    # Check the FFmpeg worker log (most common issues are here)
-    sudo journalctl -u streamer-worker -n 100 --no-pager
-    
-    # Check the Web UI / API server log
-    sudo journalctl -u streamer-web -n 100 --no-pager
+# Instal semua package yang dibutuhkan
+npm install
 
-    # Check the watchdog log
-    sudo journalctl -u streamer-watchdog -n 100 --no-pager
-    ```
--   **Check the raw log files**:
-    - Worker log: `sudo tail -f /opt/stream/logs/worker.log`
-    - FFmpeg raw output: `sudo tail -f /opt/stream/data/ffmpeg.log`
+# Build aplikasi untuk produksi
+npm run build
+```
 
--   **Common Issues**:
-    - **Invalid Stream Key**: Double-check your key in `/opt/stream/.env`.
-    - **No Videos Uploaded**: The stream will fail if `/opt/stream/videos` is empty.
-    - **Firewall**: If you use `ufw`, ensure you allow the port: `sudo ufw allow 8080/tcp`.
+Selanjutnya, buat file konfigurasi `.env`. File ini berisi variabel penting seperti Stream Key.
 
-## Hardening & Security Checklist
+```bash
+# Buat file .env baru
+nano .env
+```
 
--   [x] **Change Default Password**: Done in the post-installation steps.
--   [x] **Run Services as Non-Root User**: The `install.sh` script creates a dedicated `streamer` user.
--   [ ] **Firewall**: Manually enable `ufw` if needed.
--   [ ] **Reverse Proxy (Optional but Recommended)**: Set up Nginx or Caddy to add SSL/TLS (HTTPS).
+Isi file `.env` dengan konfigurasi minimal berikut. Path direktori harus absolut.
+
+```dotenv
+# Konfigurasi Web Server
+PORT=8080
+
+# Konfigurasi Stream
+STREAM_KEY=ganti-dengan-kunci-stream-anda
+RTMP_URL=rtmp://a.rtmp.youtube.com/live2
+
+# Path Absolut (PENTING: sesuaikan path jika instalasi tidak di /opt/stream)
+DATA_DIR=/opt/stream/data
+VIDEO_DIR=/opt/stream/videos
+
+# Lingkungan
+NODE_ENV=development
+```
+
+### 4. Jalankan Aplikasi (Mode Development)
+
+Untuk menjalankan dalam mode development, Anda perlu membuka dua terminal terpisah.
+
+```bash
+# Di terminal 1, jalankan web server
+npm run dev:web
+
+# Di terminal 2, jalankan worker
+npm run dev:worker
+```
+
+---
+
+## 🛡️ Konfigurasi Firewall (UFW)
+
+Jika Anda menggunakan Uncomplicated Firewall (UFW), pastikan untuk membuka port yang diperlukan.
+
+```bash
+# Izinkan koneksi SSH (port 22)
+sudo ufw allow ssh
+
+# Izinkan port aplikasi (8080)
+sudo ufw allow 8080
+
+# Aktifkan UFW
+sudo ufw enable
+
+# Verifikasi status
+sudo ufw status
+```
+
+---
+
+## 🧠 Menjalankan di Produksi (PM2)
+
+PM2 adalah manajer proses yang akan menjaga aplikasi tetap berjalan dan me-restartnya secara otomatis jika terjadi crash.
+
+```bash
+# Instal PM2 secara global
+sudo npm install pm2 -g
+
+# Masuk ke direktori proyek Anda yang sudah di-build
+cd yt-livestream-controller
+
+# Jalankan kedua proses (web dan worker) dengan PM2
+# PM2 akan menjalankan skrip 'start' dari package.json
+pm2 start npm --name "streamer-web" -- run start:web
+pm2 start npm --name "streamer-worker" -- run start:worker
+
+# (Opsional) Konfigurasi PM2 agar berjalan saat server startup
+pm2 save
+pm2 startup
+```
+Anda akan diberikan sebuah perintah untuk dijalankan setelah `pm2 startup`. Salin dan jalankan perintah tersebut untuk menyelesaikan setup.
+
+---
+
+## 🌐 Mengakses Aplikasi
+
+Setelah aplikasi berjalan, Anda dapat mengakses panel admin melalui browser di:
+
+`http://IP_VPS_ANDA:8080`
+
+---
+
+## ⏰ Konfigurasi Timezone Server
+
+Penting untuk memastikan waktu server akurat, terutama untuk penjadwalan.
+
+```bash
+# Cek status waktu saat ini
+timedatectl status
+
+# (Opsional) Lihat daftar timezone yang tersedia
+timedatectl list-timezones | grep Asia
+
+# Set timezone ke Waktu Indonesia Barat (WIB)
+sudo timedatectl set-timezone Asia/Jakarta
+
+# Restart aplikasi agar mengambil timezone baru
+pm2 restart streamer-web streamer-worker
+```
+
+---
+
+## 🧯 Troubleshooting
+
+### Permission Folder Video
+
+Proses worker perlu izin untuk membaca file video. Pastikan folder video (`/opt/stream/videos` atau path yang Anda tentukan di `.env`) dapat diakses.
+
+```bash
+# Contoh memberikan permission yang aman
+# Ganti 'streamer' dengan nama user yang menjalankan aplikasi jika berbeda
+sudo chown -R namauser:namauser /opt/stream/videos
+sudo chmod -R 755 /opt/stream/videos
+```
+> ⚠️ **Keamanan**: Hindari menggunakan `chmod 777` di lingkungan produksi.
+
+### Port Bentrok
+
+Jika aplikasi gagal dijalankan karena port sudah digunakan, cari dan hentikan proses yang menggunakan port tersebut.
+
+```bash
+# Cari proses yang menggunakan port 8080
+sudo lsof -i :8080
+
+# Hentikan proses dengan PID yang ditemukan
+sudo kill -9 <PID>
+```
+
+### Catatan untuk Produksi
+
+Untuk penggunaan produksi yang serius, sangat disarankan untuk:
+1.  Set `NODE_ENV=production` di file `.env` Anda.
+2.  Menggunakan reverse proxy seperti Nginx atau Caddy untuk menyediakan akses melalui HTTPS (SSL/TLS). Ini penting untuk keamanan.
