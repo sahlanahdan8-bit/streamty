@@ -1,0 +1,5 @@
+{
+  "name": "YouTube 24/7 Livestream Controller",
+  "description": "A web-based admin panel to manage a 24/7 FFmpeg-based YouTube livestream on a VPS. Features include status monitoring, start/stop controls, configuration management, and live log viewing, with a focus on reliability and auto-restarting.",
+  "requestFramePermissions": []
+}
