@@ -4,217 +4,152 @@ Sebuah panel admin berbasis web untuk mengelola livestream YouTube 24/7 mengguna
 
 ---
 
-## ⚡ Instalasi Cepat (Quick Installation)
+## ⚡ Instalasi Cepat (Otomatis)
 
-Metode ini direkomendasikan untuk server Ubuntu 22.04 LTS yang baru. Perintah tunggal ini akan mengunduh dan menjalankan skrip instalasi yang akan menangani semua dependensi dan konfigurasi secara otomatis.
+Metode ini direkomendasikan untuk **server Ubuntu 22.04 LTS yang baru dan bersih**. Perintah tunggal ini akan mengunduh dan menjalankan skrip instalasi yang menangani semua dependensi dan konfigurasi secara otomatis.
 
 ```bash
 curl -o install.sh https://raw.githubusercontent.com/sahlanahdan8-bit/yt-livestream-controller/main/install.sh && chmod +x install.sh && ./install.sh
 ```
-> ⚠️ **Penting**: Skrip di atas adalah contoh. Pastikan URL menunjuk ke file `install.sh` yang valid di repositori Anda.
 
 ---
 
-## 🔧 Instalasi Manual
+## 🔧 Instalasi Manual (Langkah demi Langkah)
 
-Ikuti langkah-langkah ini untuk instalasi manual di server Ubuntu 22.04.
+Gunakan panduan ini jika Anda ingin kontrol penuh atau menginstal di sistem yang sudah ada. Ikuti setiap langkah dengan teliti.
 
-### 1. Perbarui Sistem & Instalasi Dependensi
+### Tahap 1: Persiapan Server dan Dependensi
 
-Pertama, perbarui daftar paket sistem Anda.
+Pertama, kita akan memperbarui server dan menginstal semua perangkat lunak yang dibutuhkan.
+
+**1.1. Perbarui Sistem Operasi**
+Selalu mulai dengan memperbarui daftar paket dan meng-upgrade sistem Anda untuk keamanan dan stabilitas.
 ```bash
 sudo apt-get update && sudo apt-get upgrade -y
 ```
 
-Selanjutnya, instal Git dan FFmpeg.
+**1.2. Instal Git dan FFmpeg**
+`git` dibutuhkan untuk mengunduh kode aplikasi, dan `ffmpeg` adalah mesin inti untuk streaming.
 ```bash
 sudo apt-get install -y git ffmpeg
 ```
 
-Instal Node.js versi 20 menggunakan NodeSource.
+**1.3. Instal Node.js v20**
+Aplikasi ini berjalan di atas Node.js. Perintah ini akan menambahkan repositori NodeSource dan menginstal versi 20.
 ```bash
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install -y nodejs
 ```
 
-Terakhir, verifikasi bahwa semua perangkat lunak berhasil terinstal.
+**1.4. Verifikasi Instalasi**
+Pastikan semua perangkat lunak terinstal dengan benar.
 ```bash
 node --version
 npm --version
 ffmpeg -version
 ```
+> Anda seharusnya melihat output versi untuk setiap perintah, misalnya `v20.x.x`.
 
-### 2. Clone Repositori & Masuk ke Direktori
+### Tahap 2: Unduh dan Konfigurasi Aplikasi
 
-Langkah pertama adalah mengunduh kode proyek dari GitHub. Jalankan perintah berikut di terminal Anda:
+Sekarang kita akan mengunduh aplikasi dan mengatur konfigurasinya.
+
+**2.1. Clone Repositori dari GitHub**
+Unduh kode sumber aplikasi ke server Anda.
 ```bash
 git clone https://github.com/sahlanahdan8-bit/yt-livestream-controller.git
 ```
-Setelah selesai, Anda akan memiliki folder baru bernama `yt-livestream-controller`. Anda **harus** masuk ke folder tersebut sebelum melanjutkan. Gunakan perintah ini:
+
+**2.2. Masuk ke Direktori Proyek (SANGAT PENTING!)**
+Setelah diunduh, Anda **wajib** masuk ke dalam folder proyek. Semua perintah selanjutnya harus dijalankan dari sini.
 ```bash
 cd yt-livestream-controller
 ```
-> 👉 **Penting**: Semua perintah selanjutnya harus dijalankan dari dalam folder `yt-livestream-controller`. Anda akan melihat nama folder ini di prompt terminal Anda.
+> 💡 **Tips**: Prompt terminal Anda akan berubah dan menampilkan `yt-livestream-controller` di path-nya.
 
-### 3. Instalasi & Konfigurasi Proyek
-
-Sekarang setelah Anda berada di direktori yang benar, instal semua package yang dibutuhkan oleh aplikasi dengan perintah `npm install`.
+**2.3. Instal Dependensi Aplikasi**
+Perintah ini membaca file `package.json` dan menginstal semua pustaka yang dibutuhkan oleh aplikasi.
 ```bash
 npm install
 ```
 
-Build aplikasi untuk lingkungan produksi.
+**2.4. Buat File Konfigurasi `.env`**
+Salin dan tempel **seluruh blok di bawah ini** ke terminal Anda lalu tekan Enter. Ini akan secara otomatis membuat file `.env`.
+```bash
+cat << EOF > .env
+# Konfigurasi Web Server
+PORT=8080
+
+# Konfigurasi Stream (WAJIB DIUBAH)
+STREAM_KEY=ganti-dengan-kunci-stream-anda
+RTMP_URL=rtmp://a.rtmp.youtube.com/live2
+
+# Path Absolut (PENTING: sesuaikan jika path instalasi berbeda)
+# Menggunakan $(pwd) untuk secara otomatis mengisi direktori saat ini
+DATA_DIR=$(pwd)/data
+VIDEO_DIR=$(pwd)/videos
+
+# Lingkungan
+NODE_ENV=production
+EOF
+```
+
+**2.5. Edit File Konfigurasi (WAJIB!)**
+Buka file yang baru saja dibuat untuk memasukkan Kunci Stream YouTube Anda.
+```bash
+nano .env
+```
+Di dalam editor `nano`:
+1.  Cari baris `STREAM_KEY=ganti-dengan-kunci-stream-anda`.
+2.  Ganti `ganti-dengan-kunci-stream-anda` dengan Kunci Stream Anda yang sebenarnya.
+3.  Tekan `CTRL + X`, lalu `Y`, lalu `Enter` untuk menyimpan dan keluar.
+
+### Tahap 3: Build dan Jalankan Aplikasi
+
+Aplikasi siap untuk di-build dan dijalankan secara permanen menggunakan PM2.
+
+**3.1. Build Aplikasi**
+Perintah ini akan mengompilasi kode dari TypeScript ke JavaScript agar siap dijalankan di lingkungan produksi.
 ```bash
 npm run build
 ```
 
-Selanjutnya, buat file konfigurasi `.env`. File ini berisi variabel penting seperti Stream Key. Gunakan editor teks seperti `nano`.
-```bash
-nano .env
-```
-
-Isi file `.env` dengan konfigurasi minimal berikut. Pastikan untuk mengganti nilai placeholder dan menggunakan path direktori absolut.
-```dotenv
-# Konfigurasi Web Server
-PORT=8080
-
-# Konfigurasi Stream
-STREAM_KEY=ganti-dengan-kunci-stream-anda
-RTMP_URL=rtmp://a.rtmp.youtube.com/live2
-
-# Path Absolut (PENTING: sesuaikan path jika instalasi tidak di /opt/stream)
-DATA_DIR=/opt/stream/data
-VIDEO_DIR=/opt/stream/videos
-
-# Lingkungan
-NODE_ENV=development
-```
-
-### 4. Jalankan Aplikasi (Mode Development)
-
-Untuk menjalankan dalam mode development, Anda perlu membuka dua terminal terpisah.
-
-Di terminal pertama, jalankan web server:
-```bash
-npm run dev:web
-```
-
-Di terminal kedua, jalankan proses worker:
-```bash
-npm run dev:worker
-```
-
----
-
-## 🛡️ Konfigurasi Firewall (UFW)
-
-Jika Anda menggunakan Uncomplicated Firewall (UFW), pastikan untuk membuka port yang diperlukan.
-
-Izinkan koneksi SSH (port 22 standar).
-```bash
-sudo ufw allow ssh
-```
-
-Izinkan port yang digunakan oleh aplikasi web (contoh: 8080).
-```bash
-sudo ufw allow 8080
-```
-
-Aktifkan UFW dan verifikasi statusnya.
-```bash
-sudo ufw enable
-sudo ufw status
-```
-
----
-
-## 🧠 Menjalankan di Produksi (PM2)
-
-PM2 adalah manajer proses yang akan menjaga aplikasi tetap berjalan dan me-restartnya secara otomatis jika terjadi crash.
-
-Instal PM2 secara global menggunakan npm.
+**3.2. Instal PM2 (Process Manager)**
+PM2 adalah alat yang akan menjaga aplikasi Anda tetap berjalan 24/7 dan me-restartnya secara otomatis jika terjadi crash.
 ```bash
 sudo npm install pm2 -g
 ```
 
-Masuk ke direktori proyek Anda yang sudah di-build.
-```bash
-cd yt-livestream-controller
-```
-
-Jalankan proses web dan worker menggunakan PM2. PM2 akan menjalankan skrip `start` dari `package.json`.
+**3.3. Jalankan Aplikasi dengan PM2**
+Jalankan perintah ini dari dalam direktori `yt-livestream-controller`. PM2 akan menjalankan proses server web dan worker streaming.
 ```bash
 pm2 start npm --name "streamer-web" -- run start:web
 pm2 start npm --name "streamer-worker" -- run start:worker
 ```
 
-(Opsional) Simpan konfigurasi PM2 dan atur agar berjalan secara otomatis saat server startup.
+**3.4. (Opsional) Atur PM2 agar Berjalan saat Startup**
+Langkah ini sangat direkomendasikan agar aplikasi otomatis berjalan kembali setelah server di-reboot.
 ```bash
 pm2 save
 pm2 startup
 ```
-Anda akan diberikan sebuah perintah untuk dijalankan setelah `pm2 startup`. Salin dan jalankan perintah tersebut untuk menyelesaikan setup.
+> 👉 Setelah menjalankan `pm2 startup`, Anda akan diberikan satu perintah lagi oleh PM2. Salin dan jalankan perintah tersebut untuk menyelesaikan proses.
 
----
+### Tahap 4: Konfigurasi Firewall dan Akses
 
-## 🌐 Mengakses Aplikasi
+Langkah terakhir adalah memastikan aplikasi dapat diakses dari luar.
 
-Setelah aplikasi berjalan, Anda dapat mengakses panel admin melalui browser di:
+**4.1. Buka Port di Firewall (UFW)**
+Izinkan koneksi masuk ke port yang digunakan oleh aplikasi (misalnya 8080) dan port SSH.
+```bash
+sudo ufw allow ssh
+sudo ufw allow 8080
+sudo ufw enable
+```
+> Saat diminta konfirmasi untuk `ufw enable`, ketik `y` lalu Enter.
 
+**4.2. Akses Aplikasi**
+Sekarang Anda dapat mengakses panel admin melalui browser di:
 `http://IP_VPS_ANDA:8080`
 
----
-
-## ⏰ Konfigurasi Timezone Server
-
-Penting untuk memastikan waktu server akurat, terutama untuk penjadwalan.
-
-Cek status waktu saat ini.
-```bash
-timedatectl status
-```
-
-(Opsional) Lihat daftar timezone yang tersedia, misalnya untuk Asia.
-```bash
-timedatectl list-timezones | grep Asia
-```
-
-Set timezone ke Waktu Indonesia Barat (WIB).
-```bash
-sudo timedatectl set-timezone Asia/Jakarta
-```
-
-Restart aplikasi agar mengambil timezone yang baru.
-```bash
-pm2 restart streamer-web streamer-worker
-```
-
----
-
-## 🧯 Troubleshooting
-
-### Permission Folder Video
-
-Proses worker perlu izin untuk membaca file video. Pastikan folder video (yang Anda tentukan di `.env`) dapat diakses. Ganti `namauser` dengan nama user yang menjalankan aplikasi.
-```bash
-sudo chown -R namauser:namauser /opt/stream/videos
-sudo chmod -R 755 /opt/stream/videos
-```
-> ⚠️ **Keamanan**: Hindari menggunakan `chmod 777` di lingkungan produksi.
-
-### Port Bentrok
-
-Jika aplikasi gagal dijalankan karena port sudah digunakan, cari proses yang menggunakan port tersebut.
-```bash
-sudo lsof -i :8080
-```
-Hentikan proses dengan PID yang ditemukan.
-```bash
-sudo kill -9 <PID>
-```
-
-### Catatan untuk Produksi
-
-Untuk penggunaan produksi yang serius, sangat disarankan untuk:
-1.  Set `NODE_ENV=production` di file `.env` Anda.
-2.  Menggunakan reverse proxy seperti Nginx atau Caddy untuk menyediakan akses melalui HTTPS (SSL/TLS). Ini penting untuk keamanan.
+Selamat, instalasi selesai! Anda dapat mulai mengunggah video dan mengelola stream Anda.

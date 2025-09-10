@@ -1,6 +1,6 @@
-// FIX: To avoid global type conflicts, removed named Request/Response imports and used fully qualified express.Request and express.Response types in handlers.
-// FIX: The previous attempt to fix type conflicts was incorrect. Explicitly importing Request and Response from 'express' is the correct way to resolve ambiguity with global types.
-import express, { Request, Response } from 'express';
+// FIX: To avoid global type conflicts with DOM typings (e.g., for `fetch`),
+// we explicitly use `express.Request` and `express.Response` instead of importing `Request` and `Response` directly.
+import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import fs from 'fs/promises';
@@ -36,7 +36,7 @@ app.use(express.json());
 // --- API Endpoints ---
 
 // NEW: Endpoint to get list of available videos
-app.get('/api/videos', async (req: Request, res: Response) => {
+app.get('/api/videos', async (req: express.Request, res: express.Response) => {
     try {
         const files = await fs.readdir(VIDEO_DIR);
         // Filter for common video formats, can be expanded
@@ -50,7 +50,7 @@ app.get('/api/videos', async (req: Request, res: Response) => {
 
 
 // Get current stream status
-app.get('/api/stream/status', async (req: Request, res: Response) => {
+app.get('/api/stream/status', async (req: express.Request, res: express.Response) => {
     try {
         const statusData = await fs.readFile(STATUS_FILE, 'utf-8');
         res.json(JSON.parse(statusData));
@@ -66,7 +66,7 @@ const sendCommand = async (command: 'START' | 'STOP') => {
     await fs.writeFile(COMMAND_FILE, JSON.stringify(commandData));
 };
 
-app.post('/api/stream/start', async (req: Request, res: Response) => {
+app.post('/api/stream/start', async (req: express.Request, res: express.Response) => {
     try {
         await sendCommand('START');
         res.status(202).json({ message: 'Stream start command issued.' });
@@ -75,7 +75,7 @@ app.post('/api/stream/start', async (req: Request, res: Response) => {
     }
 });
 
-app.post('/api/stream/stop', async (req: Request, res: Response) => {
+app.post('/api/stream/stop', async (req: express.Request, res: express.Response) => {
     try {
         await sendCommand('STOP');
         res.status(202).json({ message: 'Stream stop command issued.' });
@@ -85,7 +85,7 @@ app.post('/api/stream/stop', async (req: Request, res: Response) => {
 });
 
 // Get/Set stream configuration
-app.get('/api/stream/config', async (req: Request, res: Response) => {
+app.get('/api/stream/config', async (req: express.Request, res: express.Response) => {
      try {
         const configData = await fs.readFile(CONFIG_FILE, 'utf-8');
         res.json(JSON.parse(configData));
@@ -95,7 +95,7 @@ app.get('/api/stream/config', async (req: Request, res: Response) => {
     }
 });
 
-app.post('/api/stream/config', async (req: Request, res: Response) => {
+app.post('/api/stream/config', async (req: express.Request, res: express.Response) => {
     try {
         const newConfig: StreamConfig = req.body;
         // Add validation here in a real app
@@ -124,7 +124,7 @@ app.use('/api/videos/preview', express.static(VIDEO_DIR));
 app.use(express.static(path.join(distRoot, 'public')));
 
 // SPA Fallback: For any route not matched by static assets or API, serve index.html
-app.get('*', (req: Request, res: Response) => {
+app.get('*', (req: express.Request, res: express.Response) => {
   res.sendFile(path.join(distRoot, 'public', 'index.html'));
 });
 
