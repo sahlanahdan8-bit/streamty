@@ -21,57 +21,59 @@ Ikuti langkah-langkah ini untuk instalasi manual di server Ubuntu 22.04.
 
 ### 1. Perbarui Sistem & Instalasi Dependensi
 
-Pertama, perbarui sistem Anda dan instal semua perangkat lunak yang diperlukan.
-
+Pertama, perbarui daftar paket sistem Anda.
 ```bash
-# Perbarui daftar paket
 sudo apt-get update && sudo apt-get upgrade -y
+```
 
-# Instal Git dan FFmpeg
+Selanjutnya, instal Git dan FFmpeg.
+```bash
 sudo apt-get install -y git ffmpeg
+```
 
-# Instal Node.js v20 (via NodeSource)
+Instal Node.js versi 20 menggunakan NodeSource.
+```bash
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install -y nodejs
+```
 
-# Verifikasi instalasi
-node --version # Harus menampilkan v20.x.x
+Terakhir, verifikasi bahwa semua perangkat lunak berhasil terinstal.
+```bash
+node --version
 npm --version
 ffmpeg -version
 ```
 
 ### 2. Clone Repositori
 
-Unduh kode sumber dari repositori GitHub Anda.
-
+Unduh kode sumber dari repositori GitHub.
 ```bash
 git clone https://github.com/sahlanahdan8-bit/yt-livestream-controller.git
 ```
 
 ### 3. Instalasi & Konfigurasi Proyek
 
-Masuk ke direktori proyek, instal dependensi, dan atur file konfigurasi.
-
+Masuk ke direktori proyek.
 ```bash
-# Masuk ke folder proyek
 cd yt-livestream-controller
+```
 
-# Instal semua package yang dibutuhkan
+Instal semua package yang dibutuhkan oleh proyek.
+```bash
 npm install
+```
 
-# Build aplikasi untuk produksi
+Build aplikasi untuk lingkungan produksi.
+```bash
 npm run build
 ```
 
-Selanjutnya, buat file konfigurasi `.env`. File ini berisi variabel penting seperti Stream Key.
-
+Selanjutnya, buat file konfigurasi `.env`. File ini berisi variabel penting seperti Stream Key. Gunakan editor teks seperti `nano`.
 ```bash
-# Buat file .env baru
 nano .env
 ```
 
-Isi file `.env` dengan konfigurasi minimal berikut. Path direktori harus absolut.
-
+Isi file `.env` dengan konfigurasi minimal berikut. Pastikan untuk mengganti nilai placeholder dan menggunakan path direktori absolut.
 ```dotenv
 # Konfigurasi Web Server
 PORT=8080
@@ -92,11 +94,13 @@ NODE_ENV=development
 
 Untuk menjalankan dalam mode development, Anda perlu membuka dua terminal terpisah.
 
+Di terminal pertama, jalankan web server:
 ```bash
-# Di terminal 1, jalankan web server
 npm run dev:web
+```
 
-# Di terminal 2, jalankan worker
+Di terminal kedua, jalankan proses worker:
+```bash
 npm run dev:worker
 ```
 
@@ -106,17 +110,19 @@ npm run dev:worker
 
 Jika Anda menggunakan Uncomplicated Firewall (UFW), pastikan untuk membuka port yang diperlukan.
 
+Izinkan koneksi SSH (port 22 standar).
 ```bash
-# Izinkan koneksi SSH (port 22)
 sudo ufw allow ssh
+```
 
-# Izinkan port aplikasi (8080)
+Izinkan port yang digunakan oleh aplikasi web (contoh: 8080).
+```bash
 sudo ufw allow 8080
+```
 
-# Aktifkan UFW
+Aktifkan UFW dan verifikasi statusnya.
+```bash
 sudo ufw enable
-
-# Verifikasi status
 sudo ufw status
 ```
 
@@ -126,19 +132,24 @@ sudo ufw status
 
 PM2 adalah manajer proses yang akan menjaga aplikasi tetap berjalan dan me-restartnya secara otomatis jika terjadi crash.
 
+Instal PM2 secara global menggunakan npm.
 ```bash
-# Instal PM2 secara global
 sudo npm install pm2 -g
+```
 
-# Masuk ke direktori proyek Anda yang sudah di-build
+Masuk ke direktori proyek Anda yang sudah di-build.
+```bash
 cd yt-livestream-controller
+```
 
-# Jalankan kedua proses (web dan worker) dengan PM2
-# PM2 akan menjalankan skrip 'start' dari package.json
+Jalankan proses web dan worker menggunakan PM2. PM2 akan menjalankan skrip `start` dari `package.json`.
+```bash
 pm2 start npm --name "streamer-web" -- run start:web
 pm2 start npm --name "streamer-worker" -- run start:worker
+```
 
-# (Opsional) Konfigurasi PM2 agar berjalan saat server startup
+(Opsional) Simpan konfigurasi PM2 dan atur agar berjalan secara otomatis saat server startup.
+```bash
 pm2 save
 pm2 startup
 ```
@@ -158,17 +169,23 @@ Setelah aplikasi berjalan, Anda dapat mengakses panel admin melalui browser di:
 
 Penting untuk memastikan waktu server akurat, terutama untuk penjadwalan.
 
+Cek status waktu saat ini.
 ```bash
-# Cek status waktu saat ini
 timedatectl status
+```
 
-# (Opsional) Lihat daftar timezone yang tersedia
+(Opsional) Lihat daftar timezone yang tersedia, misalnya untuk Asia.
+```bash
 timedatectl list-timezones | grep Asia
+```
 
-# Set timezone ke Waktu Indonesia Barat (WIB)
+Set timezone ke Waktu Indonesia Barat (WIB).
+```bash
 sudo timedatectl set-timezone Asia/Jakarta
+```
 
-# Restart aplikasi agar mengambil timezone baru
+Restart aplikasi agar mengambil timezone yang baru.
+```bash
 pm2 restart streamer-web streamer-worker
 ```
 
@@ -178,11 +195,8 @@ pm2 restart streamer-web streamer-worker
 
 ### Permission Folder Video
 
-Proses worker perlu izin untuk membaca file video. Pastikan folder video (`/opt/stream/videos` atau path yang Anda tentukan di `.env`) dapat diakses.
-
+Proses worker perlu izin untuk membaca file video. Pastikan folder video (yang Anda tentukan di `.env`) dapat diakses. Ganti `namauser` dengan nama user yang menjalankan aplikasi.
 ```bash
-# Contoh memberikan permission yang aman
-# Ganti 'streamer' dengan nama user yang menjalankan aplikasi jika berbeda
 sudo chown -R namauser:namauser /opt/stream/videos
 sudo chmod -R 755 /opt/stream/videos
 ```
@@ -190,13 +204,12 @@ sudo chmod -R 755 /opt/stream/videos
 
 ### Port Bentrok
 
-Jika aplikasi gagal dijalankan karena port sudah digunakan, cari dan hentikan proses yang menggunakan port tersebut.
-
+Jika aplikasi gagal dijalankan karena port sudah digunakan, cari proses yang menggunakan port tersebut.
 ```bash
-# Cari proses yang menggunakan port 8080
 sudo lsof -i :8080
-
-# Hentikan proses dengan PID yang ditemukan
+```
+Hentikan proses dengan PID yang ditemukan.
+```bash
 sudo kill -9 <PID>
 ```
 
