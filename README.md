@@ -44,21 +44,21 @@ npm --version
 ffmpeg -version
 ```
 
-### 2. Clone Repositori
+### 2. Clone Repositori & Masuk ke Direktori
 
-Unduh kode sumber dari repositori GitHub.
+Langkah pertama adalah mengunduh kode proyek dari GitHub. Jalankan perintah berikut di terminal Anda:
 ```bash
 git clone https://github.com/sahlanahdan8-bit/yt-livestream-controller.git
 ```
-
-### 3. Instalasi & Konfigurasi Proyek
-
-Masuk ke direktori proyek.
+Setelah selesai, Anda akan memiliki folder baru bernama `yt-livestream-controller`. Anda **harus** masuk ke folder tersebut sebelum melanjutkan. Gunakan perintah ini:
 ```bash
 cd yt-livestream-controller
 ```
+> 👉 **Penting**: Semua perintah selanjutnya harus dijalankan dari dalam folder `yt-livestream-controller`. Anda akan melihat nama folder ini di prompt terminal Anda.
 
-Instal semua package yang dibutuhkan oleh proyek.
+### 3. Instalasi & Konfigurasi Proyek
+
+Sekarang setelah Anda berada di direktori yang benar, instal semua package yang dibutuhkan oleh aplikasi dengan perintah `npm install`.
 ```bash
 npm install
 ```
